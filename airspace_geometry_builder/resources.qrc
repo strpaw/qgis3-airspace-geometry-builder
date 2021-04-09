@@ -1,0 +1,5 @@
+<RCC>
+    <qresource prefix="/plugins/airspace_geometry_builder" >
+        <file>icon.png</file>
+    </qresource>
+</RCC>
