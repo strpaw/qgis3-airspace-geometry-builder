@@ -179,6 +179,19 @@ class AirspaceGeometryBuilder:
                 action)
             self.iface.removeToolBarIcon(action)
 
+    def reset_circle_input_data(self):
+        self.dlg.lineEditRefLongitude.clear()
+        self.dlg.lineEditRefLatitude.clear()
+        self.dlg.lineEditCircleRadius.clear()
+        self.dlg.comboBoxCircleRadiusUOM.setCurrentIndex(0)
+
+    def reset_plugin_input_data(self):
+        """ Remove user entries when plugin is opened and set drop down list to initial state. """
+        self.dlg.lineEditPolygonName.clear()
+        self.dlg.comboBoxPolygonShape.setCurrentIndex(0)
+        self.dlg.stackedWidgetShapeData.setCurrentIndex(0)
+        self.dlg.stackedWidgetReferencePointBased.setCurrentIndex(0)
+        self.reset_circle_input_data()
 
     def run(self):
         """Run method that performs all the real work"""
@@ -192,6 +205,7 @@ class AirspaceGeometryBuilder:
 
         # show the dialog
         self.dlg.show()
+        self.reset_plugin_input_data()
         # Run the dialog event loop
         result = self.dlg.exec_()
         # See if OK was pressed
