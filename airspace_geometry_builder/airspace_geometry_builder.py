@@ -188,6 +188,7 @@ class AirspaceGeometryBuilder:
         if self.first_start == True:
             self.first_start = False
             self.dlg = AirspaceGeometryBuilderDialog()
+            self.dlg.pushButtonCancel.clicked.connect(self.dlg.close)
 
         # show the dialog
         self.dlg.show()
