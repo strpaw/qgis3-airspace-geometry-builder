@@ -21,15 +21,17 @@
  *                                                                         *
  ***************************************************************************/
 """
-from qgis.PyQt.QtCore import QSettings, QTranslator, QCoreApplication
+from qgis.PyQt.QtCore import QSettings, QTranslator, QCoreApplication, QVariant
 from qgis.PyQt.QtGui import QIcon
 from qgis.PyQt.QtWidgets import QAction
+from qgis.core import *
 
 # Initialize Qt resources from file resources.py
 from .resources import *
 # Import the code for the dialog
 from .airspace_geometry_builder_dialog import AirspaceGeometryBuilderDialog
 import os.path
+from datetime import datetime
 
 
 class AirspaceGeometryBuilder:
@@ -43,6 +45,8 @@ class AirspaceGeometryBuilder:
             application at run time.
         :type iface: QgsInterface
         """
+        self.output_layer = None
+        self.output_layer_name = ''
         # Save reference to the QGIS interface
         self.iface = iface
         # initialize plugin directory
@@ -179,6 +183,37 @@ class AirspaceGeometryBuilder:
                 action)
             self.iface.removeToolBarIcon(action)
 
+    @staticmethod
+    def generate_output_layer_name():
+        """ Generate layer name based on timestamp. """
+        timestamp = datetime.now()
+        return "AspGeometryBuilder_{}".format(timestamp.strftime("%Y_%m_%d_%H%M%f"))
+
+    @staticmethod
+    def create_output_layer(layer_name):
+        """ Create memory layer for storing features created by plugin.
+        param layer_name: str
+        return: QgsVectorLayer
+        """
+        layer = QgsVectorLayer('Polygon?crs=epsg:4326', layer_name, 'memory')
+        provider = layer.dataProvider()
+        layer.startEditing()
+        provider.addAttributes([QgsField("FEAT_NAME", QVariant.String, len=100)])
+        layer.commitChanges()
+        QgsProject.instance().addMapLayer(layer)
+        return layer
+
+    def output_layer_removed(self):
+        """ Check if output layer has been removed from layers. """
+        return not bool(QgsProject.instance().mapLayersByName(self.output_layer_name))
+
+    def set_output_layer(self):
+        if self.output_layer is None or self.output_layer_removed():
+            layer_name = AirspaceGeometryBuilder.generate_output_layer_name()
+            self.output_layer = AirspaceGeometryBuilder.create_output_layer(layer_name)
+            self.output_layer_name = self.output_layer.name()  # Keep name in case output layer is removed from Layers
+        self.iface.setActiveLayer(self.output_layer)
+
     def reset_circle_input_data(self):
         self.dlg.lineEditRefLongitude.clear()
         self.dlg.lineEditRefLatitude.clear()
@@ -193,6 +228,9 @@ class AirspaceGeometryBuilder:
         self.dlg.stackedWidgetReferencePointBased.setCurrentIndex(0)
         self.reset_circle_input_data()
 
+    def create_feature(self):
+        self.set_output_layer()
+
     def run(self):
         """Run method that performs all the real work"""
 
@@ -201,6 +239,7 @@ class AirspaceGeometryBuilder:
         if self.first_start == True:
             self.first_start = False
             self.dlg = AirspaceGeometryBuilderDialog()
+            self.dlg.pushButtonCreatePolygon.clicked.connect(self.create_feature)
             self.dlg.pushButtonCancel.clicked.connect(self.dlg.close)
 
         # show the dialog
