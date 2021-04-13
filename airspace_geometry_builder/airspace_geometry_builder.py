@@ -23,7 +23,7 @@
 """
 from qgis.PyQt.QtCore import QSettings, QTranslator, QCoreApplication, QVariant
 from qgis.PyQt.QtGui import QIcon
-from qgis.PyQt.QtWidgets import QAction
+from qgis.PyQt.QtWidgets import QAction, QWidget, QMessageBox
 from qgis.core import *
 
 # Initialize Qt resources from file resources.py
@@ -32,6 +32,8 @@ from .resources import *
 from .airspace_geometry_builder_dialog import AirspaceGeometryBuilderDialog
 import os.path
 from datetime import datetime
+from .aviation_gis_tools.distance import *
+from .aviation_gis_tools.coordinate import *
 
 
 class AirspaceGeometryBuilder:
@@ -222,14 +224,42 @@ class AirspaceGeometryBuilder:
 
     def reset_plugin_input_data(self):
         """ Remove user entries when plugin is opened and set drop down list to initial state. """
-        self.dlg.lineEditPolygonName.clear()
-        self.dlg.comboBoxPolygonShape.setCurrentIndex(0)
+        self.dlg.lineEditAirspaceName.clear()
+        self.dlg.comboBoxAspShapeMethod.setCurrentIndex(0)
         self.dlg.stackedWidgetShapeData.setCurrentIndex(0)
         self.dlg.stackedWidgetReferencePointBased.setCurrentIndex(0)
         self.reset_circle_input_data()
 
+    def get_circle_input_data(self):
+        err_msg = ""
+        asp_name = self.dlg.lineEditAirspaceName.text().strip()
+        center_lon = Coordinate(self.dlg.lineEditRefLongitude.text().strip(), AT_LONGITUDE, "Circle center longitude")
+        center_lat = Coordinate(self.dlg.lineEditRefLatitude.text().strip(), AT_LATITUDE, "Circle center latitude")
+        radius = Distance(self.dlg.lineEditCircleRadius.text().strip(), self.dlg.comboBoxCircleRadiusUOM.currentText())
+
+        if not asp_name:
+            err_msg += "Airspace name is required!\n"
+        if center_lon.err_msg:
+            err_msg += center_lon.err_msg + '\n'
+        if center_lat.err_msg:
+            err_msg += center_lat.err_msg + '\n'
+        if radius.err_msg:
+            err_msg += radius.err_msg + '\n'
+
+        if err_msg:
+            QMessageBox.critical(QWidget(), "Message", "{}".format(err_msg))
+        else:
+            return asp_name, center_lon, center_lat, radius
+
+    def create_circle(self):
+        circle_input_data = self.get_circle_input_data()
+        if circle_input_data:
+            pass
+
     def create_feature(self):
         self.set_output_layer()
+        if self.dlg.comboBoxAspShapeMethod.currentIndex() == 0:  # Circle: center, radius
+            self.create_circle()
 
     def run(self):
         """Run method that performs all the real work"""

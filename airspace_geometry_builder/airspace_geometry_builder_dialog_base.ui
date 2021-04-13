@@ -49,10 +49,10 @@
     </rect>
    </property>
    <property name="text">
-    <string>Polygon name:</string>
+    <string>Airspace name:</string>
    </property>
   </widget>
-  <widget class="QLineEdit" name="lineEditPolygonName">
+  <widget class="QLineEdit" name="lineEditAirspaceName">
    <property name="geometry">
     <rect>
      <x>130</x>
@@ -62,7 +62,7 @@
     </rect>
    </property>
   </widget>
-  <widget class="QComboBox" name="comboBoxPolygonShape">
+  <widget class="QComboBox" name="comboBoxAspShapeMethod">
    <property name="geometry">
     <rect>
      <x>130</x>
