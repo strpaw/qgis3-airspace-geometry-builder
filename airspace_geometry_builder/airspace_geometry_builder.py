@@ -32,8 +32,7 @@ from .resources import *
 from .airspace_geometry_builder_dialog import AirspaceGeometryBuilderDialog
 import os.path
 from datetime import datetime
-from .aviation_gis_tools.distance import *
-from .aviation_gis_tools.coordinate import *
+from .airspace_geometry import *
 
 
 class AirspaceGeometryBuilder:
@@ -230,6 +229,22 @@ class AirspaceGeometryBuilder:
         self.dlg.stackedWidgetReferencePointBased.setCurrentIndex(0)
         self.reset_circle_input_data()
 
+    def add_airspace(self, name, wkt):
+        """
+        :param name: str, airspace name
+        :param wkt: str, airspace geometry WKT string
+        """
+        feat = QgsFeature()
+        prov = self.output_layer.dataProvider()
+        feat_geom = QgsGeometry.fromWkt(wkt)
+        feat.setGeometry(feat_geom)
+        feat.setAttributes([name])
+        prov.addFeatures([feat])
+        self.output_layer.commitChanges()
+        self.output_layer.updateExtents()
+        self.iface.mapCanvas().setExtent(self.output_layer.extent())
+        self.iface.mapCanvas().refresh()
+
     def get_circle_input_data(self):
         err_msg = ""
         asp_name = self.dlg.lineEditAirspaceName.text().strip()
@@ -254,7 +269,9 @@ class AirspaceGeometryBuilder:
     def create_circle(self):
         circle_input_data = self.get_circle_input_data()
         if circle_input_data:
-            pass
+            asp_name, center_lon, center_lat, radius = circle_input_data
+            circle_wkt = AirspaceGeometry.circle_as_wkt(center_lon, center_lat, radius)
+            self.add_airspace(asp_name, circle_wkt)
 
     def create_feature(self):
         self.set_output_layer()
