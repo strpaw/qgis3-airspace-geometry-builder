@@ -318,6 +318,47 @@ class AirspaceGeometryBuilder:
         self.dlg.lineEditCircleCenterOffsetDistance.setEnabled(True)
         self.dlg.comboBoxCircleCenterOffsetDistanceUOM.setEnabled(True)
 
+    def get_circe_center_offset_data(self):
+        err_msg = ""
+        asp_name = self.dlg.lineEditAirspaceName.text().strip()
+        radius = Distance(self.dlg.lineEditCircleRadius.text().strip(), self.dlg.comboBoxCircleRadiusUOM.currentText())
+        ref_lon = Coordinate(self.dlg.lineEditCircleCenterOffsetLongitude.text().strip(), AT_LONGITUDE,
+                             "Circle center reference longitude")
+        ref_lat = Coordinate(self.dlg.lineEditCircleCenterOffsetLatitude.text().strip(), AT_LATITUDE,
+                             "Circle center reference latitude")
+        tbrng = self.dlg.lineEditCircleCenterOffsetTrueBearing.text().strip()
+        offset_dist = Distance(self.dlg.lineEditCircleCenterOffsetDistance.text().strip(),
+                               self.dlg.comboBoxCircleCenterOffsetDistanceUOM.currentText())
+
+        if not asp_name:
+            err_msg += "Airspace name is required!\n"
+        if radius.err_msg:
+            err_msg += radius.err_msg + '\n'
+        if ref_lon.err_msg:
+            err_msg += ref_lon.err_msg + '\n'
+        if ref_lat.err_msg:
+            err_msg += ref_lat.err_msg + '\n'
+
+        if not tbrng:
+            err_msg += "True bearing to circle center required!\n"
+        else:
+            try:
+                tbrng = float(tbrng)
+            except ValueError:
+                err_msg += "True bearing value error!\n"
+        if offset_dist.err_msg:
+            err_msg += "Circle center offset distance error!"
+
+        if err_msg:
+            QMessageBox.critical(QWidget(), "Message", "{}".format(err_msg))
+        else:
+            return asp_name, radius, ref_lon, ref_lat, tbrng, offset_dist
+
+    def create_circle_center_offset(self):
+        circle_input_data = self.get_circe_center_offset_data()
+        if circle_input_data:
+            asp_name, radius, ref_lon, ref_lat, tbrng, offset_dist = circle_input_data
+
     def switch_circle_center_definition(self):
         if self.dlg.checkBoxCircleCircleCenterOffset.isChecked():
             self.disable_circle_center_definition()
@@ -329,7 +370,10 @@ class AirspaceGeometryBuilder:
     def create_feature(self):
         self.set_output_layer()
         if self.dlg.comboBoxAspShapeMethod.currentIndex() == 0:  # Circle: center, radius
-            self.create_circle()
+            if self.dlg.checkBoxCircleCircleCenterOffset.isChecked():
+                self.get_circe_center_offset_data()
+            else:
+                self.create_circle()
 
     def run(self):
         """Run method that performs all the real work"""
