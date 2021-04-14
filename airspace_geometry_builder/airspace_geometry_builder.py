@@ -228,6 +228,8 @@ class AirspaceGeometryBuilder:
         self.dlg.stackedWidgetShapeData.setCurrentIndex(0)
         self.dlg.stackedWidgetReferencePointBased.setCurrentIndex(0)
         self.reset_circle_input_data()
+        self.dlg.checkBoxCircleCircleCenterOffset.setChecked(False)
+        self.disable_circle_center_offset()
 
     def add_airspace(self, name, wkt):
         """
@@ -244,6 +246,8 @@ class AirspaceGeometryBuilder:
         self.output_layer.updateExtents()
         self.iface.mapCanvas().setExtent(self.output_layer.extent())
         self.iface.mapCanvas().refresh()
+
+    # Circle - center, radius
 
     def get_circle_input_data(self):
         err_msg = ""
@@ -273,6 +277,55 @@ class AirspaceGeometryBuilder:
             circle_wkt = AirspaceGeometry.circle_as_wkt(center_lon, center_lat, radius)
             self.add_airspace(asp_name, circle_wkt)
 
+    # Circle - center offset
+
+    def disable_circle_center_definition(self):
+        self.dlg.lineEditRefLongitude.clear()
+        self.dlg.lineEditRefLongitude.setEnabled(False)
+        self.dlg.lineEditRefLatitude.clear()
+        self.dlg.lineEditRefLatitude.setEnabled(False)
+
+    def enable_circle_center_definition(self):
+        self.dlg.lineEditRefLongitude.setEnabled(True)
+        self.dlg.lineEditRefLatitude.setEnabled(True)
+
+    def disable_circle_center_offset(self):
+        """ Disable input controls to define circle center offset """
+        self.dlg.labelCircleCenterOffsetLongitude.setEnabled(False)
+        self.dlg.lineEditCircleCenterOffsetLongitude.clear()
+        self.dlg.lineEditCircleCenterOffsetLongitude.setEnabled(False)
+        self.dlg.labelCircleCenterOffsetLatitude.setEnabled(False)
+        self.dlg.lineEditCircleCenterOffsetLatitude.clear()
+        self.dlg.lineEditCircleCenterOffsetLatitude.setEnabled(False)
+        self.dlg.labelCircleCenterOffsetTrueBearing.setEnabled(False)
+        self.dlg.lineEditCircleCenterOffsetTrueBearing.clear()
+        self.dlg.lineEditCircleCenterOffsetTrueBearing.setEnabled(False)
+        self.dlg.labelCircleCenterOffsetDistance.setEnabled(False)
+        self.dlg.lineEditCircleCenterOffsetDistance.clear()
+        self.dlg.lineEditCircleCenterOffsetDistance.setEnabled(False)
+        self.dlg.comboBoxCircleCenterOffsetDistanceUOM.setCurrentIndex(0)
+        self.dlg.comboBoxCircleCenterOffsetDistanceUOM.setEnabled(False)
+
+    def enable_circle_center_offset(self):
+        """ Enable input controls to define circle center offset """
+        self.dlg.labelCircleCenterOffsetLongitude.setEnabled(True)
+        self.dlg.lineEditCircleCenterOffsetLongitude.setEnabled(True)
+        self.dlg.labelCircleCenterOffsetLatitude.setEnabled(True)
+        self.dlg.lineEditCircleCenterOffsetLatitude.setEnabled(True)
+        self.dlg.labelCircleCenterOffsetTrueBearing.setEnabled(True)
+        self.dlg.lineEditCircleCenterOffsetTrueBearing.setEnabled(True)
+        self.dlg.labelCircleCenterOffsetDistance.setEnabled(True)
+        self.dlg.lineEditCircleCenterOffsetDistance.setEnabled(True)
+        self.dlg.comboBoxCircleCenterOffsetDistanceUOM.setEnabled(True)
+
+    def switch_circle_center_definition(self):
+        if self.dlg.checkBoxCircleCircleCenterOffset.isChecked():
+            self.disable_circle_center_definition()
+            self.enable_circle_center_offset()
+        else:
+            self.enable_circle_center_definition()
+            self.disable_circle_center_offset()
+
     def create_feature(self):
         self.set_output_layer()
         if self.dlg.comboBoxAspShapeMethod.currentIndex() == 0:  # Circle: center, radius
@@ -286,6 +339,7 @@ class AirspaceGeometryBuilder:
         if self.first_start == True:
             self.first_start = False
             self.dlg = AirspaceGeometryBuilderDialog()
+            self.dlg.checkBoxCircleCircleCenterOffset.stateChanged.connect(self.switch_circle_center_definition)
             self.dlg.pushButtonCreatePolygon.clicked.connect(self.create_feature)
             self.dlg.pushButtonCancel.clicked.connect(self.dlg.close)
 
