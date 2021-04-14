@@ -359,6 +359,22 @@ class AirspaceGeometryBuilder:
         if circle_input_data:
             asp_name, radius, ref_lon, ref_lat, tbrng, offset_dist = circle_input_data
 
+            offset_dist_m = offset_dist.convert_distance_to_uom(UOM_M)
+            radius_m = radius.convert_distance_to_uom(UOM_M)
+
+            center_lon, center_lat = vincenty_direct_solution(ref_lon.ang_dd,
+                                                              ref_lat.ang_dd,
+                                                              tbrng, offset_dist_m)
+
+            center_lon_dms = Angle.convert_dd_to_dms(center_lon, AT_LONGITUDE)
+            center_lat_dms = Angle.convert_dd_to_dms(center_lat, AT_LATITUDE)
+            self.dlg.lineEditRefLongitude.setText(center_lon_dms)
+            self.dlg.lineEditRefLatitude.setText(center_lat_dms)
+
+            circle_vertices = AirspaceGeometry.get_circle_vertices(center_lon, center_lat, radius_m)
+            circle_wkt = AirspaceGeometry.get_geometry_as_wkt(circle_vertices)
+            self.add_airspace(asp_name, circle_wkt)
+
     def switch_circle_center_definition(self):
         if self.dlg.checkBoxCircleCircleCenterOffset.isChecked():
             self.disable_circle_center_definition()
@@ -371,7 +387,7 @@ class AirspaceGeometryBuilder:
         self.set_output_layer()
         if self.dlg.comboBoxAspShapeMethod.currentIndex() == 0:  # Circle: center, radius
             if self.dlg.checkBoxCircleCircleCenterOffset.isChecked():
-                self.get_circe_center_offset_data()
+                self.create_circle_center_offset()
             else:
                 self.create_circle()
 
