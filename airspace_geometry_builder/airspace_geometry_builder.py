@@ -391,6 +391,50 @@ class AirspaceGeometryBuilder:
             self.disable_circle_center_offset()
 
     # Circle sector
+    def get_circle_sector_data(self):
+        err_msg = ""
+        asp_name = self.dlg.lineEditAirspaceName.text().strip()
+        center_lon = Coordinate(self.dlg.lineEditRefLongitude.text().strip(), AT_LONGITUDE, "Circle center longitude")
+        center_lat = Coordinate(self.dlg.lineEditRefLatitude.text().strip(), AT_LATITUDE, "Circle center latitude")
+        tbrng_from = self.dlg.lineEditCircleSectorBrngFrom.text().strip()
+        tbrng_to = self.dlg.lineEditCircleSectorBrngTo.text().strip()
+        radius = Distance(self.dlg.lineEditCircleSectorRadius.text().strip(),
+                          self.dlg.lineEditCircleSectorRadiusUOM.currentText())
+
+        if not asp_name:
+            err_msg += "Airspace name is required!\n"
+        if center_lon.err_msg:
+            err_msg += center_lon.err_msg + '\n'
+        if center_lat.err_msg:
+            err_msg += center_lat.err_msg + '\n'
+        if not tbrng_from:
+            err_msg += "True bearing from is required!\n"
+        else:
+            try:
+                tbrng_from = float(tbrng_from)
+            except ValueError:
+                err_msg += "True bearing from value error!\n"
+
+        if not tbrng_to:
+            err_msg += "True bearing to is required!\n"
+        else:
+            try:
+                tbrng_to = float(tbrng_to)
+            except ValueError:
+                err_msg += "True bearing to value error!\n"
+
+        if radius.err_msg:
+            err_msg += radius.err_msg + '\n'
+
+        if err_msg:
+            QMessageBox.critical(QWidget(), "Message", "{}".format(err_msg))
+        else:
+            return asp_name, center_lon, center_lat, tbrng_from, tbrng_to, radius
+
+    def create_circle_sector(self):
+        circle_sector_data = self.get_circle_sector_data()
+        if circle_sector_data:
+            pass
 
     def set_asp_shape_type(self):
         if self.dlg.comboBoxAspShapeMethod.currentIndex() == 0:  # Circle
@@ -407,6 +451,8 @@ class AirspaceGeometryBuilder:
                 self.create_circle_center_offset()
             else:
                 self.create_circle()
+        if self.dlg.comboBoxAspShapeMethod.currentIndex() == 1:  # Circle sector
+            self.create_circle_sector()
 
     def run(self):
         """Run method that performs all the real work"""
