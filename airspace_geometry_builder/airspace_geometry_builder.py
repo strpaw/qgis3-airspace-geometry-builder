@@ -221,6 +221,12 @@ class AirspaceGeometryBuilder:
         self.dlg.lineEditCircleRadius.clear()
         self.dlg.comboBoxCircleRadiusUOM.setCurrentIndex(0)
 
+    def reset_circle_sector_input_data(self):
+        self.dlg.lineEditCircleSectorBrngFrom.clear()
+        self.dlg.lineEditCircleSectorBrngTo.clear()
+        self.dlg.lineEditCircleSectorRadius.clear()
+        self.dlg.lineEditCircleSectorRadiusUOM.setCurrentIndex(0)
+
     def reset_plugin_input_data(self):
         """ Remove user entries when plugin is opened and set drop down list to initial state. """
         self.dlg.lineEditAirspaceName.clear()
@@ -230,6 +236,7 @@ class AirspaceGeometryBuilder:
         self.reset_circle_input_data()
         self.dlg.checkBoxCircleCircleCenterOffset.setChecked(False)
         self.disable_circle_center_offset()
+        self.reset_circle_sector_input_data()
 
     def add_airspace(self, name, wkt):
         """
@@ -383,6 +390,16 @@ class AirspaceGeometryBuilder:
             self.enable_circle_center_definition()
             self.disable_circle_center_offset()
 
+    # Circle sector
+
+    def set_asp_shape_type(self):
+        if self.dlg.comboBoxAspShapeMethod.currentIndex() == 0:  # Circle
+            self.dlg.stackedWidgetShapeData.setCurrentIndex(0)
+            self.dlg.stackedWidgetReferencePointBased.setCurrentIndex(0)
+        elif self.dlg.comboBoxAspShapeMethod.currentIndex() == 1:  # Circle sector
+            self.dlg.stackedWidgetShapeData.setCurrentIndex(0)
+            self.dlg.stackedWidgetReferencePointBased.setCurrentIndex(1)
+
     def create_feature(self):
         self.set_output_layer()
         if self.dlg.comboBoxAspShapeMethod.currentIndex() == 0:  # Circle: center, radius
@@ -399,6 +416,7 @@ class AirspaceGeometryBuilder:
         if self.first_start == True:
             self.first_start = False
             self.dlg = AirspaceGeometryBuilderDialog()
+            self.dlg.comboBoxAspShapeMethod.currentIndexChanged.connect(self.set_asp_shape_type)
             self.dlg.checkBoxCircleCircleCenterOffset.stateChanged.connect(self.switch_circle_center_definition)
             self.dlg.pushButtonCreatePolygon.clicked.connect(self.create_feature)
             self.dlg.pushButtonCancel.clicked.connect(self.dlg.close)
