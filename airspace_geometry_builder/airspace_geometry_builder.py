@@ -444,6 +444,38 @@ class AirspaceGeometryBuilder:
             circle_sector_wkt = AirspaceGeometry.circle_sector_as_wkt(center_lon, center_lat, radius, tbrng_from, tbrng_to)
             self.add_airspace(asp_name, circle_sector_wkt)
 
+    # Circle ring
+    def get_circle_ring_data(self):
+        err_msg = ""
+        asp_name = self.dlg.lineEditAirspaceName.text().strip()
+        center_lon = Coordinate(self.dlg.lineEditRefLongitude.text().strip(), AT_LONGITUDE, "Circle ring center longitude")
+        center_lat = Coordinate(self.dlg.lineEditRefLatitude.text().strip(), AT_LATITUDE, "Circle ring center latitude")
+        inner_radius = Distance(self.dlg.lineEditCircleRingInnerRadius.text().strip(),
+                                self.dlg.lineEditCircleRingRadiiUOM.currentText())
+        outer_radius = Distance(self.dlg.lineEditCircleRingOuterRadius.text().strip(),
+                                self.dlg.lineEditCircleRingRadiiUOM.currentText())
+
+        if not asp_name:
+            err_msg += "Airspace name is required!\n"
+        if center_lon.err_msg:
+            err_msg += center_lon.err_msg + '\n'
+        if center_lat.err_msg:
+            err_msg += center_lat.err_msg + '\n'
+        if inner_radius.err_msg:
+            err_msg += inner_radius.err_msg + '\n'
+        if outer_radius.err_msg:
+            err_msg += outer_radius.err_msg + '\n'
+
+        if err_msg:
+            QMessageBox.critical(QWidget(), "Message", "{}".format(err_msg))
+        else:
+            return asp_name, center_lon, center_lat, inner_radius, outer_radius
+
+    def create_circle_ring(self):
+        circle_ring_data = self.get_circle_ring_data()
+        if circle_ring_data:
+            pass
+
     def set_asp_shape_type(self):
         if self.dlg.comboBoxAspShapeMethod.currentIndex() == 0:  # Circle
             self.dlg.stackedWidgetShapeData.setCurrentIndex(0)
@@ -464,6 +496,8 @@ class AirspaceGeometryBuilder:
                 self.create_circle()
         if self.dlg.comboBoxAspShapeMethod.currentIndex() == 1:  # Circle sector
             self.create_circle_sector()
+        if self.dlg.comboBoxAspShapeMethod.currentIndex() == 2:  # Circle ring
+            self.create_circle_ring()
 
     def run(self):
         """Run method that performs all the real work"""
