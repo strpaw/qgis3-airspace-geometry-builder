@@ -96,8 +96,8 @@ class AirspaceGeometry:
         :param center_lon: Coordinate
         :param center_lat: Coordinate
         :param radius: Distance
-        :param: tbrng_from: float
-        :param: tbrng_to: float
+        :param tbrng_from: float
+        :param tbrng_to: float
         :return: str
         """
         radius_m = radius.convert_distance_to_uom(UOM_M)
@@ -106,3 +106,27 @@ class AirspaceGeometry:
         vertices.extend(AirspaceGeometry.get_arc_vertices(center_lon.ang_dd, center_lat.ang_dd, radius_m, tbrng_from, tbrng_to))
         vertices.append(circle_center)
         return AirspaceGeometry.get_geometry_as_wkt(vertices)
+
+    @staticmethod
+    def circle_ring_as_wkt(center_lon, center_lat, inner_radius, outer_radius):
+        """
+        :param center_lon: Coordinate
+        :param center_lat: Coordinate
+        :param inner_radius: float
+        :param outer_radius: float
+        :return: str
+        """
+        outer_radius_m = outer_radius.convert_distance_to_uom(UOM_M)
+        inner_radius_m = inner_radius.convert_distance_to_uom(UOM_M)
+
+        outer_vertices = AirspaceGeometry.get_circle_vertices(center_lon.ang_dd,
+                                                              center_lat.ang_dd,
+                                                              outer_radius_m)
+        inner_vertices = AirspaceGeometry.get_circle_vertices(center_lon.ang_dd,
+                                                              center_lat.ang_dd,
+                                                              inner_radius_m)
+
+        outer_vertices_str = ','.join(outer_vertices)
+        inner_vertices_str = ','.join(inner_vertices)
+        wkt_str = "POLYGON(({}),({}))".format(outer_vertices_str, inner_vertices_str)
+        return wkt_str

@@ -474,7 +474,9 @@ class AirspaceGeometryBuilder:
     def create_circle_ring(self):
         circle_ring_data = self.get_circle_ring_data()
         if circle_ring_data:
-            pass
+            asp_name, center_lon, center_lat, inner_radius, outer_radius = circle_ring_data
+            circle_ring_wkt = AirspaceGeometry.circle_ring_as_wkt(center_lon, center_lat, inner_radius, outer_radius)
+            self.add_airspace(asp_name, circle_ring_wkt)
 
     def set_asp_shape_type(self):
         if self.dlg.comboBoxAspShapeMethod.currentIndex() == 0:  # Circle
