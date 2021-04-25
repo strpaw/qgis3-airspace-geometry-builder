@@ -1,6 +1,7 @@
 from airspace_geometry_builder.aviation_gis_tools.distance import *
 from airspace_geometry_builder.aviation_gis_tools.coordinate import *
 from airspace_geometry_builder.aviation_gis_tools.ellipsoid_calc import *
+from airspace_geometry_builder.aviation_gis_tools.bearing import *
 import math
 
 
@@ -96,14 +97,15 @@ class AirspaceGeometry:
         :param center_lon: Coordinate
         :param center_lat: Coordinate
         :param radius: Distance
-        :param tbrng_from: float
-        :param tbrng_to: float
+        :param tbrng_from: Bearing
+        :param tbrng_to: Bearing
         :return: str
         """
         radius_m = radius.convert_distance_to_uom(UOM_M)
         circle_center = "{} {}".format(center_lon.ang_dd, center_lat.ang_dd)
         vertices = [circle_center]
-        vertices.extend(AirspaceGeometry.get_arc_vertices(center_lon.ang_dd, center_lat.ang_dd, radius_m, tbrng_from, tbrng_to))
+        vertices.extend(AirspaceGeometry.get_arc_vertices(center_lon.ang_dd, center_lat.ang_dd, radius_m,
+                                                          tbrng_from.brng_dd, tbrng_to.brng_dd))
         vertices.append(circle_center)
         return AirspaceGeometry.get_geometry_as_wkt(vertices)
 

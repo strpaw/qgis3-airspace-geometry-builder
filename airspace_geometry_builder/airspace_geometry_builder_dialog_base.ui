@@ -262,7 +262,7 @@
        </property>
        <property name="geometry">
         <rect>
-         <x>130</x>
+         <x>160</x>
          <y>220</y>
          <width>113</width>
          <height>25</height>
@@ -277,12 +277,12 @@
         <rect>
          <x>20</x>
          <y>190</y>
-         <width>91</width>
+         <width>141</width>
          <height>19</height>
         </rect>
        </property>
        <property name="text">
-        <string>True bearring</string>
+        <string>Bearing to circle center</string>
        </property>
       </widget>
       <widget class="QLineEdit" name="lineEditCircleCenterOffsetTrueBearing">
@@ -291,7 +291,7 @@
        </property>
        <property name="geometry">
         <rect>
-         <x>130</x>
+         <x>160</x>
          <y>190</y>
          <width>113</width>
          <height>25</height>
@@ -320,7 +320,7 @@
        </property>
        <property name="geometry">
         <rect>
-         <x>250</x>
+         <x>280</x>
          <y>220</y>
          <width>92</width>
          <height>25</height>

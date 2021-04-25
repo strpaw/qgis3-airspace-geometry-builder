@@ -339,7 +339,8 @@ class AirspaceGeometryBuilder:
                              "Circle center reference longitude")
         ref_lat = Coordinate(self.dlg.lineEditCircleCenterOffsetLatitude.text().strip(), AT_LATITUDE,
                              "Circle center reference latitude")
-        tbrng = self.dlg.lineEditCircleCenterOffsetTrueBearing.text().strip()
+        tbrng = Bearing(self.dlg.lineEditCircleCenterOffsetTrueBearing.text().strip(),
+                        "Bearing to circle center")
         offset_dist = Distance(self.dlg.lineEditCircleCenterOffsetDistance.text().strip(),
                                self.dlg.comboBoxCircleCenterOffsetDistanceUOM.currentText())
 
@@ -351,14 +352,8 @@ class AirspaceGeometryBuilder:
             err_msg += ref_lon.err_msg + '\n'
         if ref_lat.err_msg:
             err_msg += ref_lat.err_msg + '\n'
-
-        if not tbrng:
-            err_msg += "True bearing to circle center required!\n"
-        else:
-            try:
-                tbrng = float(tbrng)
-            except ValueError:
-                err_msg += "True bearing value error!\n"
+        if tbrng.err_msg:
+            err_msg += tbrng.err_msg + '\n'
         if offset_dist.err_msg:
             err_msg += "Circle center offset distance error!"
 
@@ -377,7 +372,7 @@ class AirspaceGeometryBuilder:
 
             center_lon, center_lat = vincenty_direct_solution(ref_lon.ang_dd,
                                                               ref_lat.ang_dd,
-                                                              tbrng, offset_dist_m)
+                                                              tbrng.brng_dd, offset_dist_m)
 
             center_lon_dms = Angle.convert_dd_to_dms(center_lon, AT_LONGITUDE)
             center_lat_dms = Angle.convert_dd_to_dms(center_lat, AT_LATITUDE)
@@ -402,8 +397,10 @@ class AirspaceGeometryBuilder:
         asp_name = self.dlg.lineEditAirspaceName.text().strip()
         center_lon = Coordinate(self.dlg.lineEditRefLongitude.text().strip(), AT_LONGITUDE, "Circle center longitude")
         center_lat = Coordinate(self.dlg.lineEditRefLatitude.text().strip(), AT_LATITUDE, "Circle center latitude")
-        tbrng_from = self.dlg.lineEditCircleSectorBrngFrom.text().strip()
-        tbrng_to = self.dlg.lineEditCircleSectorBrngTo.text().strip()
+        tbrng_from = Bearing(self.dlg.lineEditCircleSectorBrngFrom.text().strip(),
+                             "Bearing from")
+        tbrng_to = Bearing(self.dlg.lineEditCircleSectorBrngTo.text().strip(),
+                           "Bearing to")
         radius = Distance(self.dlg.lineEditCircleSectorRadius.text().strip(),
                           self.dlg.lineEditCircleSectorRadiusUOM.currentText())
 
@@ -413,22 +410,10 @@ class AirspaceGeometryBuilder:
             err_msg += center_lon.err_msg + '\n'
         if center_lat.err_msg:
             err_msg += center_lat.err_msg + '\n'
-        if not tbrng_from:
-            err_msg += "True bearing from is required!\n"
-        else:
-            try:
-                tbrng_from = float(tbrng_from)
-            except ValueError:
-                err_msg += "True bearing from value error!\n"
-
-        if not tbrng_to:
-            err_msg += "True bearing to is required!\n"
-        else:
-            try:
-                tbrng_to = float(tbrng_to)
-            except ValueError:
-                err_msg += "True bearing to value error!\n"
-
+        if tbrng_from.err_msg:
+            err_msg += tbrng_from.err_msg + "\n"
+        if tbrng_to.err_msg:
+            err_msg += tbrng_to.err_msg + "\n"
         if radius.err_msg:
             err_msg += radius.err_msg + '\n'
 
