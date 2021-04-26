@@ -262,7 +262,7 @@
        </property>
        <property name="geometry">
         <rect>
-         <x>160</x>
+         <x>180</x>
          <y>220</y>
          <width>113</width>
          <height>25</height>
@@ -291,7 +291,7 @@
        </property>
        <property name="geometry">
         <rect>
-         <x>160</x>
+         <x>180</x>
          <y>190</y>
          <width>113</width>
          <height>25</height>
@@ -306,12 +306,12 @@
         <rect>
          <x>20</x>
          <y>220</y>
-         <width>68</width>
+         <width>141</width>
          <height>19</height>
         </rect>
        </property>
        <property name="text">
-        <string>Distance</string>
+        <string>Distance to circle center</string>
        </property>
       </widget>
       <widget class="QComboBox" name="comboBoxCircleCenterOffsetDistanceUOM">
@@ -320,7 +320,7 @@
        </property>
        <property name="geometry">
         <rect>
-         <x>280</x>
+         <x>300</x>
          <y>220</y>
          <width>92</width>
          <height>25</height>
@@ -403,7 +403,7 @@
       <widget class="QLineEdit" name="lineEditCircleSectorBrngFrom">
        <property name="geometry">
         <rect>
-         <x>120</x>
+         <x>160</x>
          <y>60</y>
          <width>113</width>
          <height>25</height>
@@ -413,7 +413,7 @@
       <widget class="QComboBox" name="lineEditCircleSectorRadiusUOM">
        <property name="geometry">
         <rect>
-         <x>260</x>
+         <x>300</x>
          <y>140</y>
          <width>92</width>
          <height>25</height>
@@ -448,7 +448,7 @@
       <widget class="QLineEdit" name="lineEditCircleSectorRadius">
        <property name="geometry">
         <rect>
-         <x>120</x>
+         <x>160</x>
          <y>140</y>
          <width>113</width>
          <height>25</height>
@@ -458,7 +458,7 @@
       <widget class="QLineEdit" name="lineEditCircleSectorBrngTo">
        <property name="geometry">
         <rect>
-         <x>120</x>
+         <x>160</x>
          <y>100</y>
          <width>113</width>
          <height>25</height>
@@ -490,7 +490,7 @@
         <rect>
          <x>20</x>
          <y>140</y>
-         <width>91</width>
+         <width>121</width>
          <height>21</height>
         </rect>
        </property>
@@ -502,7 +502,7 @@
         </font>
        </property>
        <property name="text">
-        <string>Radius:</string>
+        <string>Circle sector radius:</string>
        </property>
       </widget>
       <widget class="QLabel" name="label_10">
