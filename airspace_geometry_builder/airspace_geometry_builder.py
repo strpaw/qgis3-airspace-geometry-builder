@@ -473,6 +473,9 @@ class AirspaceGeometryBuilder:
         elif self.dlg.comboBoxAspShapeMethod.currentIndex() == 2:  # Circle ring
             self.dlg.stackedWidgetShapeData.setCurrentIndex(0)
             self.dlg.stackedWidgetReferencePointBased.setCurrentIndex(2)
+        elif self.dlg.comboBoxAspShapeMethod.currentIndex() == 3:  # Circle segment
+            self.dlg.stackedWidgetShapeData.setCurrentIndex(0)
+            self.dlg.stackedWidgetReferencePointBased.setCurrentIndex(3)
 
     def create_feature(self):
         self.set_output_layer()

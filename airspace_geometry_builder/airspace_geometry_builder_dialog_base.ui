@@ -86,6 +86,11 @@
      <string>Circle ring</string>
     </property>
    </item>
+   <item>
+    <property name="text">
+     <string>Circle segment</string>
+    </property>
+   </item>
   </widget>
   <widget class="QLabel" name="label_2">
    <property name="geometry">
@@ -470,7 +475,7 @@
         <rect>
          <x>20</x>
          <y>100</y>
-         <width>81</width>
+         <width>121</width>
          <height>21</height>
         </rect>
        </property>
@@ -482,7 +487,7 @@
         </font>
        </property>
        <property name="text">
-        <string>Bearing to:</string>
+        <string>Segment bearing to</string>
        </property>
       </widget>
       <widget class="QLabel" name="label_12">
@@ -502,7 +507,7 @@
         </font>
        </property>
        <property name="text">
-        <string>Circle sector radius:</string>
+        <string>Arc radius</string>
        </property>
       </widget>
       <widget class="QLabel" name="label_10">
@@ -510,7 +515,7 @@
         <rect>
          <x>20</x>
          <y>60</y>
-         <width>91</width>
+         <width>131</width>
          <height>21</height>
         </rect>
        </property>
@@ -522,7 +527,7 @@
         </font>
        </property>
        <property name="text">
-        <string>Bearing from:</string>
+        <string>Segment bearing from</string>
        </property>
       </widget>
      </widget>
@@ -643,6 +648,133 @@
        </property>
       </widget>
      </widget>
+     <widget class="QWidget" name="page_5">
+      <widget class="QLineEdit" name="lineEditCircleSegmentBrngTo">
+       <property name="geometry">
+        <rect>
+         <x>150</x>
+         <y>90</y>
+         <width>113</width>
+         <height>25</height>
+        </rect>
+       </property>
+      </widget>
+      <widget class="QLineEdit" name="lineEditCircleSegmentRadius">
+       <property name="geometry">
+        <rect>
+         <x>150</x>
+         <y>120</y>
+         <width>113</width>
+         <height>25</height>
+        </rect>
+       </property>
+      </widget>
+      <widget class="QLabel" name="label_16">
+       <property name="geometry">
+        <rect>
+         <x>40</x>
+         <y>120</y>
+         <width>111</width>
+         <height>21</height>
+        </rect>
+       </property>
+       <property name="font">
+        <font>
+         <pointsize>8</pointsize>
+         <weight>50</weight>
+         <bold>false</bold>
+        </font>
+       </property>
+       <property name="text">
+        <string>Radius:</string>
+       </property>
+      </widget>
+      <widget class="QLabel" name="label_17">
+       <property name="geometry">
+        <rect>
+         <x>40</x>
+         <y>90</y>
+         <width>111</width>
+         <height>21</height>
+        </rect>
+       </property>
+       <property name="font">
+        <font>
+         <pointsize>8</pointsize>
+         <weight>50</weight>
+         <bold>false</bold>
+        </font>
+       </property>
+       <property name="text">
+        <string>Bearing to:</string>
+       </property>
+      </widget>
+      <widget class="QComboBox" name="lineEditCircleSegmentRadiusUOM">
+       <property name="geometry">
+        <rect>
+         <x>280</x>
+         <y>120</y>
+         <width>92</width>
+         <height>25</height>
+        </rect>
+       </property>
+       <item>
+        <property name="text">
+         <string>m</string>
+        </property>
+       </item>
+       <item>
+        <property name="text">
+         <string>km</string>
+        </property>
+       </item>
+       <item>
+        <property name="text">
+         <string>NM</string>
+        </property>
+       </item>
+       <item>
+        <property name="text">
+         <string>feet</string>
+        </property>
+       </item>
+       <item>
+        <property name="text">
+         <string>SM</string>
+        </property>
+       </item>
+      </widget>
+      <widget class="QLabel" name="label_18">
+       <property name="geometry">
+        <rect>
+         <x>40</x>
+         <y>60</y>
+         <width>111</width>
+         <height>21</height>
+        </rect>
+       </property>
+       <property name="font">
+        <font>
+         <pointsize>8</pointsize>
+         <weight>50</weight>
+         <bold>false</bold>
+        </font>
+       </property>
+       <property name="text">
+        <string>Bearing from:</string>
+       </property>
+      </widget>
+      <widget class="QLineEdit" name="lineEditCircleSegmentBrngFrom">
+       <property name="geometry">
+        <rect>
+         <x>150</x>
+         <y>60</y>
+         <width>113</width>
+         <height>25</height>
+        </rect>
+       </property>
+      </widget>
+     </widget>
     </widget>
    </widget>
   </widget>
@@ -669,6 +801,10 @@
   <tabstop>pushButtonCreatePolygon</tabstop>
   <tabstop>lineEditCircleCenterOffsetDistance</tabstop>
   <tabstop>pushButtonCancel</tabstop>
+  <tabstop>lineEditCircleSegmentBrngFrom</tabstop>
+  <tabstop>lineEditCircleSegmentBrngTo</tabstop>
+  <tabstop>lineEditCircleSegmentRadius</tabstop>
+  <tabstop>lineEditCircleSegmentRadiusUOM</tabstop>
  </tabstops>
  <resources/>
  <connections/>
