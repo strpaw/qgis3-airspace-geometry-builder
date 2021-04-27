@@ -647,6 +647,29 @@
    </widget>
   </widget>
  </widget>
+ <tabstops>
+  <tabstop>lineEditAirspaceName</tabstop>
+  <tabstop>comboBoxAspShapeMethod</tabstop>
+  <tabstop>lineEditRefLongitude</tabstop>
+  <tabstop>lineEditRefLatitude</tabstop>
+  <tabstop>lineEditCircleRadius</tabstop>
+  <tabstop>comboBoxCircleRadiusUOM</tabstop>
+  <tabstop>checkBoxCircleCircleCenterOffset</tabstop>
+  <tabstop>lineEditCircleCenterOffsetLongitude</tabstop>
+  <tabstop>lineEditCircleCenterOffsetLatitude</tabstop>
+  <tabstop>lineEditCircleCenterOffsetTrueBearing</tabstop>
+  <tabstop>comboBoxCircleCenterOffsetDistanceUOM</tabstop>
+  <tabstop>lineEditCircleSectorBrngFrom</tabstop>
+  <tabstop>lineEditCircleSectorBrngTo</tabstop>
+  <tabstop>lineEditCircleSectorRadius</tabstop>
+  <tabstop>lineEditCircleSectorRadiusUOM</tabstop>
+  <tabstop>lineEditCircleRingInnerRadius</tabstop>
+  <tabstop>lineEditCircleRingOuterRadius</tabstop>
+  <tabstop>lineEditCircleRingRadiiUOM</tabstop>
+  <tabstop>pushButtonCreatePolygon</tabstop>
+  <tabstop>lineEditCircleCenterOffsetDistance</tabstop>
+  <tabstop>pushButtonCancel</tabstop>
+ </tabstops>
  <resources/>
  <connections/>
 </ui>
