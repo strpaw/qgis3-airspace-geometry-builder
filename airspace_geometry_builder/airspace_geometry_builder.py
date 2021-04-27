@@ -265,30 +265,29 @@ class AirspaceGeometryBuilder:
     def get_circle_input_data(self):
         err_msg = ""
         asp_name = self.dlg.lineEditAirspaceName.text().strip()
-        center_lon = Coordinate(self.dlg.lineEditRefLongitude.text().strip(), AT_LONGITUDE, "Circle center longitude")
-        center_lat = Coordinate(self.dlg.lineEditRefLatitude.text().strip(), AT_LATITUDE, "Circle center latitude")
+        center = Point(self.dlg.lineEditRefLongitude.text().strip(),
+                       self.dlg.lineEditRefLatitude.text().strip(),
+                       "Circle center")
         radius = Distance(self.dlg.lineEditCircleRadius.text().strip(), self.dlg.comboBoxCircleRadiusUOM.currentText(),
                           "Circle radius")
 
         if not asp_name:
             err_msg += "Airspace name is required!\n"
-        if center_lon.err_msg:
-            err_msg += center_lon.err_msg + '\n'
-        if center_lat.err_msg:
-            err_msg += center_lat.err_msg + '\n'
+        if center.err_msg:
+            err_msg += center.err_msg + '\n'
         if radius.err_msg:
             err_msg += radius.err_msg + '\n'
 
         if err_msg:
             QMessageBox.critical(QWidget(), "Message", "{}".format(err_msg))
         else:
-            return asp_name, center_lon, center_lat, radius
+            return asp_name, center,  radius
 
     def create_circle(self):
         circle_input_data = self.get_circle_input_data()
         if circle_input_data:
-            asp_name, center_lon, center_lat, radius = circle_input_data
-            circle_wkt = AirspaceGeometry.circle_as_wkt(center_lon, center_lat, radius)
+            asp_name, center, radius = circle_input_data
+            circle_wkt = AirspaceGeometry.circle_as_wkt(center, radius)
             self.add_airspace(asp_name, circle_wkt)
 
     # Circle - center offset
@@ -337,10 +336,9 @@ class AirspaceGeometryBuilder:
         asp_name = self.dlg.lineEditAirspaceName.text().strip()
         radius = Distance(self.dlg.lineEditCircleRadius.text().strip(), self.dlg.comboBoxCircleRadiusUOM.currentText(),
                           'Circle radius')
-        ref_lon = Coordinate(self.dlg.lineEditCircleCenterOffsetLongitude.text().strip(), AT_LONGITUDE,
-                             "Circle center reference longitude")
-        ref_lat = Coordinate(self.dlg.lineEditCircleCenterOffsetLatitude.text().strip(), AT_LATITUDE,
-                             "Circle center reference latitude")
+        ref_point = Point(self.dlg.lineEditCircleCenterOffsetLongitude.text().strip(),
+                          self.dlg.lineEditCircleCenterOffsetLatitude.text().strip(),
+                          "Circle center reference")
         tbrng = Bearing(self.dlg.lineEditCircleCenterOffsetTrueBearing.text().strip(),
                         "Bearing to circle center")
         offset_dist = Distance(self.dlg.lineEditCircleCenterOffsetDistance.text().strip(),
@@ -351,10 +349,8 @@ class AirspaceGeometryBuilder:
             err_msg += "Airspace name is required!\n"
         if radius.err_msg:
             err_msg += radius.err_msg + '\n'
-        if ref_lon.err_msg:
-            err_msg += ref_lon.err_msg + '\n'
-        if ref_lat.err_msg:
-            err_msg += ref_lat.err_msg + '\n'
+        if ref_point.err_msg:
+            err_msg += ref_point.err_msg + '\n'
         if tbrng.err_msg:
             err_msg += tbrng.err_msg + '\n'
         if offset_dist.err_msg:
@@ -363,18 +359,18 @@ class AirspaceGeometryBuilder:
         if err_msg:
             QMessageBox.critical(QWidget(), "Message", "{}".format(err_msg))
         else:
-            return asp_name, radius, ref_lon, ref_lat, tbrng, offset_dist
+            return asp_name, radius, ref_point, tbrng, offset_dist
 
     def create_circle_center_offset(self):
         circle_input_data = self.get_circe_center_offset_data()
         if circle_input_data:
-            asp_name, radius, ref_lon, ref_lat, tbrng, offset_dist = circle_input_data
+            asp_name, radius, ref_point, tbrng, offset_dist = circle_input_data
 
             offset_dist_m = offset_dist.convert_distance_to_uom(UOM_M)
             radius_m = radius.convert_distance_to_uom(UOM_M)
 
-            center_lon, center_lat = vincenty_direct_solution(ref_lon.ang_dd,
-                                                              ref_lat.ang_dd,
+            center_lon, center_lat = vincenty_direct_solution(ref_point.lon.ang_dd,
+                                                              ref_point.lat.ang_dd,
                                                               tbrng.brng_dd, offset_dist_m)
 
             center_lon_dms = Angle.convert_dd_to_dms(center_lon, AT_LONGITUDE)
@@ -398,8 +394,9 @@ class AirspaceGeometryBuilder:
     def get_circle_sector_data(self):
         err_msg = ""
         asp_name = self.dlg.lineEditAirspaceName.text().strip()
-        center_lon = Coordinate(self.dlg.lineEditRefLongitude.text().strip(), AT_LONGITUDE, "Circle center longitude")
-        center_lat = Coordinate(self.dlg.lineEditRefLatitude.text().strip(), AT_LATITUDE, "Circle center latitude")
+        circle_sector_center = Point(self.dlg.lineEditRefLongitude.text().strip(),
+                                     self.dlg.lineEditRefLatitude.text().strip(),
+                                     "Circle sector center")
         tbrng_from = Bearing(self.dlg.lineEditCircleSectorBrngFrom.text().strip(),
                              "Bearing from")
         tbrng_to = Bearing(self.dlg.lineEditCircleSectorBrngTo.text().strip(),
@@ -410,10 +407,8 @@ class AirspaceGeometryBuilder:
 
         if not asp_name:
             err_msg += "Airspace name is required!\n"
-        if center_lon.err_msg:
-            err_msg += center_lon.err_msg + '\n'
-        if center_lat.err_msg:
-            err_msg += center_lat.err_msg + '\n'
+        if circle_sector_center.err_msg:
+            err_msg += circle_sector_center.err_msg + '\n'
         if tbrng_from.err_msg:
             err_msg += tbrng_from.err_msg + "\n"
         if tbrng_to.err_msg:
@@ -424,21 +419,22 @@ class AirspaceGeometryBuilder:
         if err_msg:
             QMessageBox.critical(QWidget(), "Message", "{}".format(err_msg))
         else:
-            return asp_name, center_lon, center_lat, tbrng_from, tbrng_to, radius
+            return asp_name, circle_sector_center, tbrng_from, tbrng_to, radius
 
     def create_circle_sector(self):
         circle_sector_data = self.get_circle_sector_data()
         if circle_sector_data:
-            asp_name, center_lon, center_lat, tbrng_from, tbrng_to, radius = circle_sector_data
-            circle_sector_wkt = AirspaceGeometry.circle_sector_as_wkt(center_lon, center_lat, radius, tbrng_from, tbrng_to)
+            asp_name, circle_sector_data, tbrng_from, tbrng_to, radius = circle_sector_data
+            circle_sector_wkt = AirspaceGeometry.circle_sector_as_wkt(circle_sector_data, radius, tbrng_from, tbrng_to)
             self.add_airspace(asp_name, circle_sector_wkt)
 
     # Circle ring
     def get_circle_ring_data(self):
         err_msg = ""
         asp_name = self.dlg.lineEditAirspaceName.text().strip()
-        center_lon = Coordinate(self.dlg.lineEditRefLongitude.text().strip(), AT_LONGITUDE, "Circle ring center longitude")
-        center_lat = Coordinate(self.dlg.lineEditRefLatitude.text().strip(), AT_LATITUDE, "Circle ring center latitude")
+        circle_ring_center = Point(self.dlg.lineEditRefLongitude.text().strip(),
+                                   self.dlg.lineEditRefLatitude.text().strip(),
+                                   "Circle ring center")
         inner_radius = Distance(self.dlg.lineEditCircleRingInnerRadius.text().strip(),
                                 self.dlg.lineEditCircleRingRadiiUOM.currentText(),
                                 'Inner radius')
@@ -448,10 +444,8 @@ class AirspaceGeometryBuilder:
 
         if not asp_name:
             err_msg += "Airspace name is required!\n"
-        if center_lon.err_msg:
-            err_msg += center_lon.err_msg + '\n'
-        if center_lat.err_msg:
-            err_msg += center_lat.err_msg + '\n'
+        if circle_ring_center.err_msg:
+            err_msg += circle_ring_center.err_msg + '\n'
         if inner_radius.err_msg:
             err_msg += inner_radius.err_msg + '\n'
         if outer_radius.err_msg:
@@ -460,13 +454,13 @@ class AirspaceGeometryBuilder:
         if err_msg:
             QMessageBox.critical(QWidget(), "Message", "{}".format(err_msg))
         else:
-            return asp_name, center_lon, center_lat, inner_radius, outer_radius
+            return asp_name, circle_ring_center, inner_radius, outer_radius
 
     def create_circle_ring(self):
         circle_ring_data = self.get_circle_ring_data()
         if circle_ring_data:
-            asp_name, center_lon, center_lat, inner_radius, outer_radius = circle_ring_data
-            circle_ring_wkt = AirspaceGeometry.circle_ring_as_wkt(center_lon, center_lat, inner_radius, outer_radius)
+            asp_name, circle_ring_data, inner_radius, outer_radius = circle_ring_data
+            circle_ring_wkt = AirspaceGeometry.circle_ring_as_wkt(circle_ring_data, inner_radius, outer_radius)
             self.add_airspace(asp_name, circle_ring_wkt)
 
     def set_asp_shape_type(self):

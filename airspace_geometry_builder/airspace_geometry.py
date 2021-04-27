@@ -2,6 +2,7 @@ from airspace_geometry_builder.aviation_gis_tools.distance import *
 from airspace_geometry_builder.aviation_gis_tools.coordinate import *
 from airspace_geometry_builder.aviation_gis_tools.ellipsoid_calc import *
 from airspace_geometry_builder.aviation_gis_tools.bearing import *
+from airspace_geometry_builder.aviation_gis_tools.point import *
 import math
 
 
@@ -31,16 +32,15 @@ class AirspaceGeometry:
         return "POLYGON(({}))".format(vertices_str)
 
     @staticmethod
-    def circle_as_wkt(center_lon, center_lat, radius):
+    def circle_as_wkt(center, radius):
         """
-        :param center_lon: Coordinate
-        :param center_lat: Coordinate
+        :param center: Point
         :param radius: Distance
         :return: str
         """
         radius_m = radius.convert_distance_to_uom(UOM_M)
-        vertices = AirspaceGeometry.get_circle_vertices(center_lon.ang_dd,
-                                                        center_lat.ang_dd,
+        vertices = AirspaceGeometry.get_circle_vertices(center.lon.ang_dd,
+                                                        center.lat.ang_dd,
                                                         radius_m)
         return AirspaceGeometry.get_geometry_as_wkt(vertices)
 
@@ -92,28 +92,26 @@ class AirspaceGeometry:
         return vertices
 
     @staticmethod
-    def circle_sector_as_wkt(center_lon, center_lat, radius, tbrng_from, tbrng_to):
+    def circle_sector_as_wkt(center, radius, tbrng_from, tbrng_to):
         """
-        :param center_lon: Coordinate
-        :param center_lat: Coordinate
+        :param center: Point
         :param radius: Distance
         :param tbrng_from: Bearing
         :param tbrng_to: Bearing
         :return: str
         """
         radius_m = radius.convert_distance_to_uom(UOM_M)
-        circle_center = "{} {}".format(center_lon.ang_dd, center_lat.ang_dd)
+        circle_center = "{} {}".format(center.lon.ang_dd, center.lat.ang_dd)
         vertices = [circle_center]
-        vertices.extend(AirspaceGeometry.get_arc_vertices(center_lon.ang_dd, center_lat.ang_dd, radius_m,
+        vertices.extend(AirspaceGeometry.get_arc_vertices(center.lon.ang_dd, center.lat.ang_dd, radius_m,
                                                           tbrng_from.brng_dd, tbrng_to.brng_dd))
         vertices.append(circle_center)
         return AirspaceGeometry.get_geometry_as_wkt(vertices)
 
     @staticmethod
-    def circle_ring_as_wkt(center_lon, center_lat, inner_radius, outer_radius):
+    def circle_ring_as_wkt(center, inner_radius, outer_radius):
         """
-        :param center_lon: Coordinate
-        :param center_lat: Coordinate
+        :param center: Point
         :param inner_radius: float
         :param outer_radius: float
         :return: str
@@ -121,11 +119,11 @@ class AirspaceGeometry:
         outer_radius_m = outer_radius.convert_distance_to_uom(UOM_M)
         inner_radius_m = inner_radius.convert_distance_to_uom(UOM_M)
 
-        outer_vertices = AirspaceGeometry.get_circle_vertices(center_lon.ang_dd,
-                                                              center_lat.ang_dd,
+        outer_vertices = AirspaceGeometry.get_circle_vertices(center.lon.ang_dd,
+                                                              center.lat.ang_dd,
                                                               outer_radius_m)
-        inner_vertices = AirspaceGeometry.get_circle_vertices(center_lon.ang_dd,
-                                                              center_lat.ang_dd,
+        inner_vertices = AirspaceGeometry.get_circle_vertices(center.lon.ang_dd,
+                                                              center.lat.ang_dd,
                                                               inner_radius_m)
 
         outer_vertices_str = ','.join(outer_vertices)
