@@ -130,3 +130,21 @@ class AirspaceGeometry:
         inner_vertices_str = ','.join(inner_vertices)
         wkt_str = "POLYGON(({}),({}))".format(outer_vertices_str, inner_vertices_str)
         return wkt_str
+
+    @staticmethod
+    def circle_segment_as_wkt(center, radius, brng_from, brng_to):
+        """
+        :param center: Point
+        :param radius: Distance
+        :param brng_from: Bearing
+        :param brng_to: Bearing
+        :return: str
+        """
+        radius_m = radius.convert_distance_to_uom(UOM_M)
+        vertices = AirspaceGeometry.get_arc_vertices(center.lon.ang_dd,
+                                                     center.lat.ang_dd,
+                                                     radius_m,
+                                                     brng_from.brng_dd,
+                                                     brng_to.brng_dd)
+        vertices.append(vertices[0])
+        return AirspaceGeometry.get_geometry_as_wkt(vertices)
