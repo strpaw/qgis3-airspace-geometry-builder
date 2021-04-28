@@ -463,6 +463,42 @@ class AirspaceGeometryBuilder:
             circle_ring_wkt = AirspaceGeometry.circle_ring_as_wkt(circle_ring_data, inner_radius, outer_radius)
             self.add_airspace(asp_name, circle_ring_wkt)
 
+    # Circle segment
+    def get_circle_segment_data(self):
+        err_msg = ""
+        asp_name = self.dlg.lineEditAirspaceName.text().strip()
+        circle_segment_center = Point(self.dlg.lineEditRefLongitude.text().strip(),
+                                      self.dlg.lineEditRefLatitude.text().strip(),
+                                      "Cirle segment center")
+        tbrng_from = Bearing(self.dlg.lineEditCircleSegmentBrngFrom.text().strip(),
+                             "Bearing from")
+        tbrng_to = Bearing(self.dlg.lineEditCircleSegmentBrngTo.text().strip(),
+                           "Bearing to")
+        radius = Distance(self.dlg.lineEditCircleSegmentRadius.text().strip(),
+                          self.dlg.lineEditCircleSegmentRadiusUOM.currentText(),
+                          'Circle segment radius')
+
+        if not asp_name:
+            err_msg += "Airspace name is required!\n"
+        if circle_segment_center.err_msg:
+            err_msg += circle_segment_center.err_msg + '\n'
+        if tbrng_from.err_msg:
+            err_msg += tbrng_from.err_msg + "\n"
+        if tbrng_to.err_msg:
+            err_msg += tbrng_to.err_msg + "\n"
+        if radius.err_msg:
+            err_msg += radius.err_msg + '\n'
+
+        if err_msg:
+            QMessageBox.critical(QWidget(), "Message", "{}".format(err_msg))
+        else:
+            return asp_name, circle_segment_center, tbrng_from, tbrng_to, radius
+
+    def create_circle_segment(self):
+        circle_segment_data = self.get_circle_segment_data()
+        if circle_segment_data:
+            pass
+
     def set_asp_shape_type(self):
         if self.dlg.comboBoxAspShapeMethod.currentIndex() == 0:  # Circle
             self.dlg.stackedWidgetShapeData.setCurrentIndex(0)
@@ -488,6 +524,8 @@ class AirspaceGeometryBuilder:
             self.create_circle_sector()
         if self.dlg.comboBoxAspShapeMethod.currentIndex() == 2:  # Circle ring
             self.create_circle_ring()
+        if self.dlg.comboBoxAspShapeMethod.currentIndex() == 3:  # Circle segment
+            self.create_circle_segment()
 
     def run(self):
         """Run method that performs all the real work"""
