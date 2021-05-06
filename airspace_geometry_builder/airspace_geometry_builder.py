@@ -509,6 +509,48 @@ class AirspaceGeometryBuilder:
             circle_segment_wkt = AirspaceGeometry.circle_segment_as_wkt(circle_segment_center, radius, tbrng_from, tbrng_to)
             self.add_airspace(asp_name, circle_segment_wkt)
 
+    # Circle ring sector
+    def get_circle_ring_sector_data(self):
+        err_msg = ""
+        asp_name = self.dlg.lineEditAirspaceName.text().strip()
+        circle_ring_sector_center = Point(self.dlg.lineEditRefLongitude.text().strip(),
+                                          self.dlg.lineEditRefLatitude.text().strip(),
+                                          "Circle ring sector center")
+        tbrng_from = Bearing(self.dlg.lineEditCircleRingSectorBearingFrom.text().strip(),
+                             "Bearing from")
+        tbrng_to = Bearing(self.dlg.lineEditCircleRingSectorBearingTo.text().strip(),
+                           "Bearing to")
+
+        inner_radius = Distance(self.dlg.lineEditCircleRingSectorInnerRadius.text().strip(),
+                                self.dlg.comboBoxlCircleRingSectorRadiiUOM.currentText(),
+                                'Circle ring sector inner radius')
+        outer_radius = Distance(self.dlg.lineEditCircleRingSectorOuterRadius.text().strip(),
+                                self.dlg.comboBoxlCircleRingSectorRadiiUOM.currentText(),
+                                'Circle ring sector outer radius')
+
+        if not asp_name:
+            err_msg += "Airspace name is required!\n"
+        if circle_ring_sector_center.err_msg:
+            err_msg += circle_ring_sector_center.err_msg + '\n'
+        if tbrng_from.err_msg:
+            err_msg += tbrng_from.err_msg + "\n"
+        if tbrng_to.err_msg:
+            err_msg += tbrng_to.err_msg + "\n"
+        if inner_radius.err_msg:
+            err_msg += inner_radius.err_msg + '\n'
+        if outer_radius.err_msg:
+            err_msg += outer_radius.err_msg + '\n'
+
+        if err_msg:
+            QMessageBox.critical(QWidget(), "Message", "{}".format(err_msg))
+        else:
+            return asp_name, circle_ring_sector_center, tbrng_from, tbrng_to, inner_radius, outer_radius
+
+    def create_circle_ring_sector(self):
+        circle_ring_sector_data = self.get_circle_ring_sector_data()
+        if circle_ring_sector_data:
+            asp_name, circle_ring_sector_center, tbrng_from, tbrng_to, inner_radius, outer_radius = circle_ring_sector_data
+
     def set_asp_shape_type(self):
         if self.dlg.comboBoxAspShapeMethod.currentIndex() == 0:  # Circle
             self.dlg.stackedWidgetShapeData.setCurrentIndex(0)
@@ -539,6 +581,8 @@ class AirspaceGeometryBuilder:
             self.create_circle_ring()
         if self.dlg.comboBoxAspShapeMethod.currentIndex() == 3:  # Circle segment
             self.create_circle_segment()
+        if self.dlg.comboBoxAspShapeMethod.currentIndex() == 4:  # Circle segment
+            self.create_circle_ring_sector()
 
     def run(self):
         """Run method that performs all the real work"""
