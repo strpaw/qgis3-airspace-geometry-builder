@@ -91,6 +91,11 @@
      <string>Circle segment</string>
     </property>
    </item>
+   <item>
+    <property name="text">
+     <string>Circle ring sector</string>
+    </property>
+   </item>
   </widget>
   <widget class="QLabel" name="label_2">
    <property name="geometry">
@@ -187,7 +192,7 @@
       </rect>
      </property>
      <property name="currentIndex">
-      <number>0</number>
+      <number>4</number>
      </property>
      <widget class="QWidget" name="page_3">
       <widget class="QComboBox" name="comboBoxCircleRadiusUOM">
@@ -775,6 +780,183 @@
        </property>
       </widget>
      </widget>
+     <widget class="QWidget" name="page_6">
+      <widget class="QLineEdit" name="lineEditCircleRingSectorBearingTo">
+       <property name="geometry">
+        <rect>
+         <x>130</x>
+         <y>80</y>
+         <width>113</width>
+         <height>25</height>
+        </rect>
+       </property>
+      </widget>
+      <widget class="QLabel" name="label_19">
+       <property name="geometry">
+        <rect>
+         <x>20</x>
+         <y>50</y>
+         <width>111</width>
+         <height>21</height>
+        </rect>
+       </property>
+       <property name="font">
+        <font>
+         <pointsize>8</pointsize>
+         <weight>50</weight>
+         <bold>false</bold>
+        </font>
+       </property>
+       <property name="text">
+        <string>Bearing from:</string>
+       </property>
+      </widget>
+      <widget class="QLabel" name="label_20">
+       <property name="geometry">
+        <rect>
+         <x>20</x>
+         <y>80</y>
+         <width>111</width>
+         <height>21</height>
+        </rect>
+       </property>
+       <property name="font">
+        <font>
+         <pointsize>8</pointsize>
+         <weight>50</weight>
+         <bold>false</bold>
+        </font>
+       </property>
+       <property name="text">
+        <string>Bearing to:</string>
+       </property>
+      </widget>
+      <widget class="QLineEdit" name="lineEditCircleRingSectorOuterRadius">
+       <property name="geometry">
+        <rect>
+         <x>130</x>
+         <y>140</y>
+         <width>113</width>
+         <height>25</height>
+        </rect>
+       </property>
+      </widget>
+      <widget class="QComboBox" name="comboBoxlCircleRingSectorRadiiUOM">
+       <property name="geometry">
+        <rect>
+         <x>130</x>
+         <y>170</y>
+         <width>92</width>
+         <height>25</height>
+        </rect>
+       </property>
+       <item>
+        <property name="text">
+         <string>m</string>
+        </property>
+       </item>
+       <item>
+        <property name="text">
+         <string>km</string>
+        </property>
+       </item>
+       <item>
+        <property name="text">
+         <string>NM</string>
+        </property>
+       </item>
+       <item>
+        <property name="text">
+         <string>ft</string>
+        </property>
+       </item>
+       <item>
+        <property name="text">
+         <string>SM</string>
+        </property>
+       </item>
+      </widget>
+      <widget class="QLabel" name="label_21">
+       <property name="geometry">
+        <rect>
+         <x>20</x>
+         <y>140</y>
+         <width>111</width>
+         <height>21</height>
+        </rect>
+       </property>
+       <property name="font">
+        <font>
+         <pointsize>8</pointsize>
+         <weight>50</weight>
+         <bold>false</bold>
+        </font>
+       </property>
+       <property name="text">
+        <string>Radius outer:</string>
+       </property>
+      </widget>
+      <widget class="QLineEdit" name="lineEditCircleRingSectorBearingFrom">
+       <property name="geometry">
+        <rect>
+         <x>130</x>
+         <y>50</y>
+         <width>113</width>
+         <height>25</height>
+        </rect>
+       </property>
+      </widget>
+      <widget class="QLabel" name="label_22">
+       <property name="geometry">
+        <rect>
+         <x>20</x>
+         <y>110</y>
+         <width>111</width>
+         <height>21</height>
+        </rect>
+       </property>
+       <property name="font">
+        <font>
+         <pointsize>8</pointsize>
+         <weight>50</weight>
+         <bold>false</bold>
+        </font>
+       </property>
+       <property name="text">
+        <string>Radius inner:</string>
+       </property>
+      </widget>
+      <widget class="QLineEdit" name="lineEditCircleRingSectorInnerRadius">
+       <property name="geometry">
+        <rect>
+         <x>130</x>
+         <y>110</y>
+         <width>113</width>
+         <height>25</height>
+        </rect>
+       </property>
+      </widget>
+      <widget class="QLabel" name="label_23">
+       <property name="geometry">
+        <rect>
+         <x>20</x>
+         <y>170</y>
+         <width>111</width>
+         <height>21</height>
+        </rect>
+       </property>
+       <property name="font">
+        <font>
+         <pointsize>8</pointsize>
+         <weight>50</weight>
+         <bold>false</bold>
+        </font>
+       </property>
+       <property name="text">
+        <string>Radii UOM:</string>
+       </property>
+      </widget>
+     </widget>
     </widget>
    </widget>
   </widget>
@@ -805,6 +987,11 @@
   <tabstop>lineEditCircleSegmentBrngTo</tabstop>
   <tabstop>lineEditCircleSegmentRadius</tabstop>
   <tabstop>lineEditCircleSegmentRadiusUOM</tabstop>
+  <tabstop>lineEditCircleRingSectorBearingFrom</tabstop>
+  <tabstop>lineEditCircleRingSectorBearingTo</tabstop>
+  <tabstop>lineEditCircleRingSectorInnerRadius</tabstop>
+  <tabstop>lineEditCircleRingSectorOuterRadius</tabstop>
+  <tabstop>comboBoxlCircleRingSectorRadiiUOM</tabstop>
  </tabstops>
  <resources/>
  <connections/>

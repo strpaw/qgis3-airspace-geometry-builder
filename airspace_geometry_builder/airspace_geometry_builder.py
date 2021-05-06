@@ -232,6 +232,13 @@ class AirspaceGeometryBuilder:
         self.dlg.lineEditCircleRingOuterRadius.clear()
         self.dlg.lineEditCircleRingRadiiUOM.setCurrentIndex(0)
 
+    def reset_circle_ring_sector_input_data(self):
+        self.dlg.lineEditCircleRingSectorBearingFrom.clear()
+        self.dlg.lineEditCircleRingSectorBearingTo.clear()
+        self.dlg.lineEditCircleRingSectorInnerRadius.clear()
+        self.dlg.lineEditCircleRingSectorOuterRadius.clear()
+        self.dlg.comboBoxlCircleRingSectorRadiiUOM.setCurrentIndex(0)
+
     def reset_plugin_input_data(self):
         """ Remove user entries when plugin is opened and set drop down list to initial state. """
         self.dlg.lineEditAirspaceName.clear()
@@ -243,6 +250,7 @@ class AirspaceGeometryBuilder:
         self.disable_circle_center_offset()
         self.reset_circle_sector_input_data()
         self.reset_circle_ring_input_data()
+        self.reset_circle_ring_sector_input_data()
 
     def add_airspace(self, name, wkt):
         """
@@ -514,6 +522,9 @@ class AirspaceGeometryBuilder:
         elif self.dlg.comboBoxAspShapeMethod.currentIndex() == 3:  # Circle segment
             self.dlg.stackedWidgetShapeData.setCurrentIndex(0)
             self.dlg.stackedWidgetReferencePointBased.setCurrentIndex(3)
+        elif self.dlg.comboBoxAspShapeMethod.currentIndex() == 4:  # Circle ring sector
+            self.dlg.stackedWidgetShapeData.setCurrentIndex(0)
+            self.dlg.stackedWidgetReferencePointBased.setCurrentIndex(4)
 
     def create_feature(self):
         self.set_output_layer()
