@@ -148,3 +148,35 @@ class AirspaceGeometry:
                                                      brng_to.brng_dd)
         vertices.append(vertices[0])
         return AirspaceGeometry.get_geometry_as_wkt(vertices)
+
+    @staticmethod
+    def circle_ring_sector_as_wkt(center, brng_from, brng_to, inner_radius, outer_radius):
+        """
+        :param center: Point
+        :param brng_from: Bearing
+        :param brng_to: Bearing
+        :param inner_radius: Distance
+        :param outer_radius: Distance
+        :return: str
+        """
+        vertices = []
+        inner_radius_m = inner_radius.convert_distance_to_uom(UOM_M)
+        outer_radius_m = outer_radius.convert_distance_to_uom(UOM_M)
+        outer_arc = AirspaceGeometry.get_arc_vertices(center.lon.ang_dd,
+                                                      center.lat.ang_dd,
+                                                      outer_radius_m,
+                                                      brng_from.brng_dd,
+                                                      brng_to.brng_dd)
+
+        inner_arc = AirspaceGeometry.get_arc_vertices(center.lon.ang_dd,
+                                                      center.lat.ang_dd,
+                                                      inner_radius_m,
+                                                      brng_from.brng_dd,
+                                                      brng_to.brng_dd)
+        # Revers inner arc, arc starts at "bearing to" and ends at "bearing from"
+        reversed_inner_arc = list(reversed(inner_arc))
+
+        vertices.extend(outer_arc)
+        vertices.extend(reversed_inner_arc)
+        vertices.append(vertices[0])
+        return AirspaceGeometry.get_geometry_as_wkt(vertices)
