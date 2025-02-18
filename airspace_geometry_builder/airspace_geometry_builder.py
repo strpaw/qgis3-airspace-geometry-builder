@@ -21,18 +21,31 @@
  *                                                                         *
  ***************************************************************************/
 """
+import os.path
+from datetime import datetime
+
 from qgis.PyQt.QtCore import QSettings, QTranslator, QCoreApplication, QVariant
 from qgis.PyQt.QtGui import QIcon
 from qgis.PyQt.QtWidgets import QAction, QWidget, QMessageBox
-from qgis.core import *
+from qgis.core import (
+    QgsFeature,
+    QgsField,
+    QgsGeometry,
+    QgsProject,
+    QgsVectorLayer
+)
 
 # Initialize Qt resources from file resources.py
-from .resources import *
+from .resources import *  # pylint: disable=unused-wildcard-import, wildcard-import
 # Import the code for the dialog
 from .airspace_geometry_builder_dialog import AirspaceGeometryBuilderDialog
-import os.path
-from datetime import datetime
-from .airspace_geometry import *
+from .aviation_gis_tools.angle import AT_LATITUDE, AT_LONGITUDE, Angle
+from .aviation_gis_tools.bearing import Bearing
+from .aviation_gis_tools.const import UOM_M
+from .aviation_gis_tools.distance import Distance
+from .aviation_gis_tools.ellipsoid_calc import vincenty_direct_solution
+from .aviation_gis_tools.point import Point
+from .airspace_geometry import AirspaceGeometry
 
 
 class AirspaceGeometryBuilder:
@@ -57,7 +70,7 @@ class AirspaceGeometryBuilder:
         locale_path = os.path.join(
             self.plugin_dir,
             'i18n',
-            'AirspaceGeometryBuilder_{}.qm'.format(locale))
+            f'AirspaceGeometryBuilder_{locale}.qm')
 
         if os.path.exists(locale_path):
             self.translator = QTranslator()
@@ -66,7 +79,7 @@ class AirspaceGeometryBuilder:
 
         # Declare instance attributes
         self.actions = []
-        self.menu = self.tr(u'&AirspaceGeometryBuilder')
+        self.menu = self.tr('&AirspaceGeometryBuilder')
 
         # Check if plugin was started the first time in current QGIS session
         # Must be set in initGui() to survive plugin reloads
@@ -87,7 +100,6 @@ class AirspaceGeometryBuilder:
         # noinspection PyTypeChecker,PyArgumentList,PyCallByClass
         return QCoreApplication.translate('AirspaceGeometryBuilder', message)
 
-
     def add_action(
         self,
         icon_path,
@@ -98,7 +110,8 @@ class AirspaceGeometryBuilder:
         add_to_toolbar=True,
         status_tip=None,
         whats_this=None,
-        parent=None):
+        parent=None
+    ):  # pylint: disable=too-many-positional-arguments
         """Add a toolbar icon to the toolbar.
 
         :param icon_path: Path to the icon for this action. Can be a resource
@@ -162,33 +175,32 @@ class AirspaceGeometryBuilder:
 
         return action
 
-    def initGui(self):
+    def initGui(self):  # pylint: disable=invalid-name
         """Create the menu entries and toolbar icons inside the QGIS GUI."""
 
         icon_path = ':/plugins/airspace_geometry_builder/icon.png'
         self.add_action(
             icon_path,
-            text=self.tr(u'AirspaceGeometryBuilder'),
+            text=self.tr('AirspaceGeometryBuilder'),
             callback=self.run,
             parent=self.iface.mainWindow())
 
         # will be set False in run()
         self.first_start = True
 
-
     def unload(self):
         """Removes the plugin menu item and icon from QGIS GUI."""
         for action in self.actions:
             self.iface.removePluginMenu(
-                self.tr(u'&AirspaceGeometryBuilder'),
+                self.tr('&AirspaceGeometryBuilder'),
                 action)
             self.iface.removeToolBarIcon(action)
 
     @staticmethod
     def generate_output_layer_name():
         """ Generate layer name based on timestamp. """
-        timestamp = datetime.now()
-        return "AspGeometryBuilder_{}".format(timestamp.strftime("%Y_%m_%d_%H%M%f"))
+        timestamp = datetime.now().strftime("%Y_%m_%d_%H%M%f")
+        return f"AspGeometryBuilder_{timestamp}"
 
     @staticmethod
     def create_output_layer(layer_name):
@@ -209,6 +221,7 @@ class AirspaceGeometryBuilder:
         return not bool(QgsProject.instance().mapLayersByName(self.output_layer_name))
 
     def set_output_layer(self):
+        """Ensure that output layer is active (selected) from layer list"""
         if self.output_layer is None or self.output_layer_removed():
             layer_name = AirspaceGeometryBuilder.generate_output_layer_name()
             self.output_layer = AirspaceGeometryBuilder.create_output_layer(layer_name)
@@ -216,23 +229,27 @@ class AirspaceGeometryBuilder:
         self.iface.setActiveLayer(self.output_layer)
 
     def reset_circle_input_data(self):
+        """Reset GUI elements: clear text from line edits, set default item on the dropdown list etc."""
         self.dlg.lineEditRefLongitude.clear()
         self.dlg.lineEditRefLatitude.clear()
         self.dlg.lineEditCircleRadius.clear()
         self.dlg.comboBoxCircleRadiusUOM.setCurrentIndex(0)
 
     def reset_circle_sector_input_data(self):
+        """Reset GUI elements: clear text from line edits, set default item on the dropdown list etc."""
         self.dlg.lineEditCircleSectorBrngFrom.clear()
         self.dlg.lineEditCircleSectorBrngTo.clear()
         self.dlg.lineEditCircleSectorRadius.clear()
         self.dlg.lineEditCircleSectorRadiusUOM.setCurrentIndex(0)
 
     def reset_circle_ring_input_data(self):
+        """Reset GUI elements: clear text from line edits, set default item on the dropdown list etc."""
         self.dlg.lineEditCircleRingInnerRadius.clear()
         self.dlg.lineEditCircleRingOuterRadius.clear()
         self.dlg.lineEditCircleRingRadiiUOM.setCurrentIndex(0)
 
     def reset_circle_ring_sector_input_data(self):
+        """Reset GUI elements: clear text from line edits, set default item on the dropdown list etc."""
         self.dlg.lineEditCircleRingSectorBearingFrom.clear()
         self.dlg.lineEditCircleRingSectorBearingTo.clear()
         self.dlg.lineEditCircleRingSectorInnerRadius.clear()
@@ -271,6 +288,7 @@ class AirspaceGeometryBuilder:
     # Circle - center, radius
 
     def get_circle_input_data(self):
+        """Return input data that defines circle"""
         err_msg = ""
         asp_name = self.dlg.lineEditAirspaceName.text().strip()
         center = Point(self.dlg.lineEditRefLongitude.text().strip(),
@@ -287,11 +305,13 @@ class AirspaceGeometryBuilder:
             err_msg += radius.err_msg + '\n'
 
         if err_msg:
-            QMessageBox.critical(QWidget(), "Message", "{}".format(err_msg))
-        else:
-            return asp_name, center,  radius
+            QMessageBox.critical(QWidget(), "Message", err_msg)
+            return None
+
+        return asp_name, center,  radius
 
     def create_circle(self):
+        """Create and add airspace shape circle defined by circle center coordinates/radius the output layer"""
         circle_input_data = self.get_circle_input_data()
         if circle_input_data:
             asp_name, center, radius = circle_input_data
@@ -301,12 +321,14 @@ class AirspaceGeometryBuilder:
     # Circle - center offset
 
     def disable_circle_center_definition(self):
+        """Disable GUI element for definition `offset` circle center"""
         self.dlg.lineEditRefLongitude.clear()
         self.dlg.lineEditRefLongitude.setEnabled(False)
         self.dlg.lineEditRefLatitude.clear()
         self.dlg.lineEditRefLatitude.setEnabled(False)
 
     def enable_circle_center_definition(self):
+        """Enable GUI element for definition `offset` circle center"""
         self.dlg.lineEditRefLongitude.setEnabled(True)
         self.dlg.lineEditRefLatitude.setEnabled(True)
 
@@ -340,6 +362,7 @@ class AirspaceGeometryBuilder:
         self.dlg.comboBoxCircleCenterOffsetDistanceUOM.setEnabled(True)
 
     def get_circe_center_offset_data(self):
+        """Return input data that defines circle center by bearing/distance against reference point"""
         err_msg = ""
         asp_name = self.dlg.lineEditAirspaceName.text().strip()
         radius = Distance(self.dlg.lineEditCircleRadius.text().strip(), self.dlg.comboBoxCircleRadiusUOM.currentText(),
@@ -365,11 +388,14 @@ class AirspaceGeometryBuilder:
             err_msg += offset_dist.err_msg
 
         if err_msg:
-            QMessageBox.critical(QWidget(), "Message", "{}".format(err_msg))
-        else:
-            return asp_name, radius, ref_point, tbrng, offset_dist
+            QMessageBox.critical(QWidget(), "Message", err_msg)
+            return None
+
+        return asp_name, radius, ref_point, tbrng, offset_dist
 
     def create_circle_center_offset(self):
+        """Create and add airspace shape circle with circle center defined by bearing/distance and
+         reference coordinates the output layer"""
         circle_input_data = self.get_circe_center_offset_data()
         if circle_input_data:
             asp_name, radius, ref_point, tbrng, offset_dist = circle_input_data
@@ -391,6 +417,7 @@ class AirspaceGeometryBuilder:
             self.add_airspace(asp_name, circle_wkt)
 
     def switch_circle_center_definition(self):
+        """Disable/enable circle center definition by bearing/distance against reference point"""
         if self.dlg.checkBoxCircleCircleCenterOffset.isChecked():
             self.disable_circle_center_definition()
             self.enable_circle_center_offset()
@@ -400,6 +427,7 @@ class AirspaceGeometryBuilder:
 
     # Circle sector
     def get_circle_sector_data(self):
+        """Return input data that defines circle sector"""
         err_msg = ""
         asp_name = self.dlg.lineEditAirspaceName.text().strip()
         circle_sector_center = Point(self.dlg.lineEditRefLongitude.text().strip(),
@@ -425,11 +453,13 @@ class AirspaceGeometryBuilder:
             err_msg += radius.err_msg + '\n'
 
         if err_msg:
-            QMessageBox.critical(QWidget(), "Message", "{}".format(err_msg))
-        else:
-            return asp_name, circle_sector_center, tbrng_from, tbrng_to, radius
+            QMessageBox.critical(QWidget(), "Message", err_msg)
+            return None
+
+        return asp_name, circle_sector_center, tbrng_from, tbrng_to, radius
 
     def create_circle_sector(self):
+        """Create and add airspace shape circle sector to the output layer"""
         circle_sector_data = self.get_circle_sector_data()
         if circle_sector_data:
             asp_name, circle_sector_data, tbrng_from, tbrng_to, radius = circle_sector_data
@@ -438,6 +468,7 @@ class AirspaceGeometryBuilder:
 
     # Circle ring
     def get_circle_ring_data(self):
+        """Return input data that defines circle ring"""
         err_msg = ""
         asp_name = self.dlg.lineEditAirspaceName.text().strip()
         circle_ring_center = Point(self.dlg.lineEditRefLongitude.text().strip(),
@@ -460,11 +491,13 @@ class AirspaceGeometryBuilder:
             err_msg += outer_radius.err_msg + '\n'
 
         if err_msg:
-            QMessageBox.critical(QWidget(), "Message", "{}".format(err_msg))
-        else:
-            return asp_name, circle_ring_center, inner_radius, outer_radius
+            QMessageBox.critical(QWidget(), "Message", err_msg)
+            return None
+
+        return asp_name, circle_ring_center, inner_radius, outer_radius
 
     def create_circle_ring(self):
+        """Create and add airspace shape circle ring to the output layer"""
         circle_ring_data = self.get_circle_ring_data()
         if circle_ring_data:
             asp_name, circle_ring_data, inner_radius, outer_radius = circle_ring_data
@@ -473,6 +506,7 @@ class AirspaceGeometryBuilder:
 
     # Circle segment
     def get_circle_segment_data(self):
+        """Return input data that defines circle segment"""
         err_msg = ""
         asp_name = self.dlg.lineEditAirspaceName.text().strip()
         circle_segment_center = Point(self.dlg.lineEditRefLongitude.text().strip(),
@@ -498,19 +532,23 @@ class AirspaceGeometryBuilder:
             err_msg += radius.err_msg + '\n'
 
         if err_msg:
-            QMessageBox.critical(QWidget(), "Message", "{}".format(err_msg))
-        else:
-            return asp_name, circle_segment_center, tbrng_from, tbrng_to, radius
+            QMessageBox.critical(QWidget(), "Message", err_msg)
+            return None
+
+        return asp_name, circle_segment_center, tbrng_from, tbrng_to, radius
 
     def create_circle_segment(self):
+        """Create and add airspace shape circle segment to the output layer"""
         circle_segment_data = self.get_circle_segment_data()
         if circle_segment_data:
             asp_name, circle_segment_center, tbrng_from, tbrng_to, radius = circle_segment_data
-            circle_segment_wkt = AirspaceGeometry.circle_segment_as_wkt(circle_segment_center, radius, tbrng_from, tbrng_to)
+            circle_segment_wkt = AirspaceGeometry.circle_segment_as_wkt(circle_segment_center, radius,
+                                                                        tbrng_from, tbrng_to)
             self.add_airspace(asp_name, circle_segment_wkt)
 
     # Circle ring sector
     def get_circle_ring_sector_data(self):
+        """Return input data that defines circle ring sector"""
         err_msg = ""
         asp_name = self.dlg.lineEditAirspaceName.text().strip()
         circle_ring_sector_center = Point(self.dlg.lineEditRefLongitude.text().strip(),
@@ -542,11 +580,13 @@ class AirspaceGeometryBuilder:
             err_msg += outer_radius.err_msg + '\n'
 
         if err_msg:
-            QMessageBox.critical(QWidget(), "Message", "{}".format(err_msg))
-        else:
-            return asp_name, circle_ring_sector_center, tbrng_from, tbrng_to, inner_radius, outer_radius
+            QMessageBox.critical(QWidget(), "Message", err_msg)
+            return None
+
+        return asp_name, circle_ring_sector_center, tbrng_from, tbrng_to, inner_radius, outer_radius
 
     def create_circle_ring_sector(self):
+        """Create and add airspace shape circle ring sector to the output layer"""
         circle_ring_sector_data = self.get_circle_ring_sector_data()
         if circle_ring_sector_data:
             asp_name, circle_ring_sector_center, tbrng_from, tbrng_to, inner_radius, outer_radius = circle_ring_sector_data
@@ -556,6 +596,7 @@ class AirspaceGeometryBuilder:
             self.add_airspace(asp_name, circle_ring_sector_wkt)
 
     def set_asp_shape_type(self):
+        """Set GUI input elements according to the selected airspace shape type (circle, circle segment etc.)"""
         if self.dlg.comboBoxAspShapeMethod.currentIndex() == 0:  # Circle
             self.dlg.stackedWidgetShapeData.setCurrentIndex(0)
             self.dlg.stackedWidgetReferencePointBased.setCurrentIndex(0)
@@ -573,6 +614,7 @@ class AirspaceGeometryBuilder:
             self.dlg.stackedWidgetReferencePointBased.setCurrentIndex(4)
 
     def create_feature(self):
+        """Create airspace geometry at output layer"""
         self.set_output_layer()
         if self.dlg.comboBoxAspShapeMethod.currentIndex() == 0:  # Circle: center, radius
             if self.dlg.checkBoxCircleCircleCenterOffset.isChecked():
@@ -593,7 +635,7 @@ class AirspaceGeometryBuilder:
 
         # Create the dialog with elements (after translation) and keep reference
         # Only create GUI ONCE in callback, so that it will only load when the plugin is started
-        if self.first_start == True:
+        if self.first_start:
             self.first_start = False
             self.dlg = AirspaceGeometryBuilderDialog()
             self.dlg.comboBoxAspShapeMethod.currentIndexChanged.connect(self.set_asp_shape_type)
